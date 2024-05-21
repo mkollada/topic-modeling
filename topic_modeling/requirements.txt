@@ -1,0 +1,8 @@
+pandas
+tqdm
+gensim
+numpy
+scipy==1.12
+nltk
+psutil
+PyPDF2
