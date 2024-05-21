@@ -10,6 +10,9 @@ from utils import calculate_kl_divergence, save_topics_to_csv, load_reference_te
 
 def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_above=0.9, minimum_topic_probability=0, max_files=None, num_words=10):
     start_time = time.time()
+
+    output_dir = 'outputs'
+    os.makedirs(output_dir, exist_ok=True)
     
     try:
         print("Initializing text corpus...")
@@ -52,14 +55,14 @@ def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_abov
         print("Outputting topic distributions to CSV...")
         filenames = [os.path.splitext(os.path.basename(filepath))[0] for filepath in text_corpus.filepaths]
         df = pd.DataFrame(topic_distributions, index=filenames, columns=[f'Topic {i+1}' for i in range(num_topics)])
-        df.to_csv('topic_distributions.csv')
+        df.to_csv(os.path.join( output_dir, 'topic_distributions.csv'))
 
         print("Outputting topics and words to CSV...")
-        save_topics_to_csv(lda_model, num_words, 'topics_words.csv')
+        save_topics_to_csv(lda_model, num_words, os.path.join(output_dir,'topics_words.csv'))
 
         print("Outputting KL divergences to CSV...")
         kl_df = pd.DataFrame(kl_divergences, index=filenames, columns=['KL Divergence'])
-        kl_df.to_csv('kl_divergences.csv')
+        kl_df.to_csv(os.path.join(output_dir, 'kl_divergences.csv'))
         for i, kl_div in enumerate(kl_divergences):
             print(f'Document {filenames[i]}: KL Divergence = {kl_div}')
         
