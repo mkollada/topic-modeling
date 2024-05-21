@@ -5,4 +5,4 @@ numpy
 scipy==1.12
 nltk
 psutil
-PyPDF2
+PyPDF2==2.10s
