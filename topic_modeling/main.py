@@ -90,7 +90,7 @@ class TextCorpus:
 
     def build_dictionary(self):
         print("Building dictionary from documents...")
-        for filepath in tqdm(self.filepaths, desc="Building dictionary", unit="file"):
+        for filepath in tqdm(self.filepaths, desc="Building dictionary", unit="file", leave=False):
             ext = os.path.splitext(filepath)[1].lower()
             if ext == '.pdf':
                 text = get_text_from_pdf(filepath)
@@ -108,7 +108,7 @@ class TextCorpus:
 
 class TextCorpusWithProgress(TextCorpus):
     def __iter__(self):
-        for filepath in tqdm(self.filepaths, desc="Processing files", unit="file"):
+        for filepath in tqdm(self.filepaths, desc="Processing files", unit="file", leave=False):
             if filepath in self.preprocessed_texts:
                 yield self.dictionary.doc2bow(self.preprocessed_texts[filepath])
             else:
@@ -125,7 +125,7 @@ class TextCorpusWithProgress(TextCorpus):
 def get_topic_distribution(lda_model, corpus, num_topics, minimum_probability):
     topic_distributions = []
     print("Calculating topic distributions for documents...")
-    for bow in tqdm(corpus, desc="Calculating topic distributions", unit="document"):
+    for bow in tqdm(corpus, desc="Calculating topic distributions", unit="document", leave=False):
         topic_distribution = lda_model.get_document_topics(bow, minimum_probability=minimum_probability)  # Use user-defined minimum probability
         topic_probs = [0] * num_topics
         for topic_id, prob in topic_distribution:
@@ -167,7 +167,14 @@ def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_abov
         reference_bow = text_corpus.dictionary.doc2bow(preprocess_text(reference_text))
         
         print("Training LDA model...")
-        lda_model = models.LdaModel(text_corpus, num_topics=num_topics, id2word=text_corpus.dictionary, passes=passes)
+        # Check the length of the corpus
+        corpus_length = sum(1 for _ in text_corpus)
+        if corpus_length == 0:
+            print("The corpus is empty. Exiting...")
+            return
+        print(f"Corpus length: {corpus_length}")
+
+        lda_model = models.LdaModel(corpus=text_corpus, num_topics=num_topics, id2word=text_corpus.dictionary, passes=passes, chunksize=max(1, corpus_length // 10))
 
         print("Getting topic distributions for documents in the corpus...")
         topic_distributions = get_topic_distribution(lda_model, text_corpus, num_topics, minimum_topic_probability)
@@ -181,7 +188,7 @@ def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_abov
 
         print("Calculating KL divergence for documents...")
         kl_divergences = []
-        for dist in tqdm(topic_distributions, desc="Calculating KL divergences", unit="document"):
+        for dist in tqdm(topic_distributions, desc="Calculating KL divergences", unit="document", leave=False):
             kl_div = calculate_kl_divergence(dist, reference_distribution)
             kl_divergences.append(kl_div)
         
