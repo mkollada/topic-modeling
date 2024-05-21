@@ -15,7 +15,7 @@ def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_abov
         print("Initializing text corpus...")
         text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files)
 
-        print("Building dictionary...")
+        print("Building dictionary from documents...")
         text_corpus.build_dictionary()
 
         if len(text_corpus.dictionary) == 0:
@@ -26,8 +26,9 @@ def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_abov
         reference_bow = text_corpus.dictionary.doc2bow(load_reference_text(reference_file))
         
         print("Training LDA model...")
+        lda_start = time.time()
         lda_model, corpus_length = train_lda_model(text_corpus, num_topics, passes)
-
+        print(f'Finished LDA Model Training. Time taken: {time.time() - lda_start:.2f} seconds')
         if corpus_length == 0:
             print("The corpus is empty. Exiting...")
             return

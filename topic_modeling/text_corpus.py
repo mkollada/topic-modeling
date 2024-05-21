@@ -8,7 +8,6 @@ MEMORY_THRESHOLD = 80
 
 def is_memory_usage_high(threshold=MEMORY_THRESHOLD):
     """Check if the memory usage is above the specified threshold."""
-    import psutil
     memory_info = psutil.virtual_memory()
     return memory_info.percent > threshold
 
@@ -39,7 +38,6 @@ class TextCorpus:
                 yield self.dictionary.doc2bow(tokens)
 
     def build_dictionary(self):
-        print("Building dictionary from documents...")
         for filepath in tqdm(self.filepaths, desc="Building dictionary", unit="file", leave=False):
             ext = os.path.splitext(filepath)[1].lower()
             if ext == '.pdf':
@@ -58,16 +56,18 @@ class TextCorpus:
 
 class TextCorpusWithProgress(TextCorpus):
     def __iter__(self):
-        for filepath in tqdm(self.filepaths, desc="Processing files", unit="file", leave=False):
+        uncached_filepaths = [filepath for filepath in self.filepaths if filepath not in self.preprocessed_texts]
+        for filepath in tqdm(uncached_filepaths, desc="Processing files", unit="file", leave=False):
+            ext = os.path.splitext(filepath)[1].lower()
+            if ext == '.pdf':
+                text = get_text_from_pdf(filepath)
+            elif ext == '.txt':
+                text = get_text_from_txt(filepath)
+            tokens = preprocess_text(text)
+            if not is_memory_usage_high():
+                self.preprocessed_texts[filepath] = tokens
+            yield self.dictionary.doc2bow(tokens)
+
+        for filepath in self.filepaths:
             if filepath in self.preprocessed_texts:
                 yield self.dictionary.doc2bow(self.preprocessed_texts[filepath])
-            else:
-                ext = os.path.splitext(filepath)[1].lower()
-                if ext == '.pdf':
-                    text = get_text_from_pdf(filepath)
-                elif ext == '.txt':
-                    text = get_text_from_txt(filepath)
-                tokens = preprocess_text(text)
-                if not is_memory_usage_high():
-                    self.preprocessed_texts[filepath] = tokens
-                yield self.dictionary.doc2bow(tokens)
