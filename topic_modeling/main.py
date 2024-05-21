@@ -1,24 +1,28 @@
 import argparse
 import time
 import os
-import numpy as np
 import pandas as pd
 from tqdm import tqdm
 from text_corpus import TextCorpusWithProgress
 from lda_model import train_lda_model, get_topic_distribution
 from utils import calculate_kl_divergence, save_topics_to_csv, load_reference_text
+import nltk
+
+def download_nltk_data():
+    nltk.download('punkt')
+    nltk.download('stopwords')
 
 def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_above=0.9, minimum_topic_probability=0, max_files=None, num_words=10):
-    start_time = time.time()
+    # Ensure necessary NLTK data is downloaded
+    download_nltk_data()
 
-    output_dir = 'outputs'
-    os.makedirs(output_dir, exist_ok=True)
+    start_time = time.time()
     
     try:
         print("Initializing text corpus...")
         text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files)
 
-        print("Building dictionary from documents...")
+        print("Building dictionary...")
         text_corpus.build_dictionary()
 
         if len(text_corpus.dictionary) == 0:
@@ -29,9 +33,8 @@ def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_abov
         reference_bow = text_corpus.dictionary.doc2bow(load_reference_text(reference_file))
         
         print("Training LDA model...")
-        lda_start = time.time()
         lda_model, corpus_length = train_lda_model(text_corpus, num_topics, passes)
-        print(f'Finished LDA Model Training. Time taken: {time.time() - lda_start:.2f} seconds')
+
         if corpus_length == 0:
             print("The corpus is empty. Exiting...")
             return
@@ -55,14 +58,14 @@ def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_abov
         print("Outputting topic distributions to CSV...")
         filenames = [os.path.splitext(os.path.basename(filepath))[0] for filepath in text_corpus.filepaths]
         df = pd.DataFrame(topic_distributions, index=filenames, columns=[f'Topic {i+1}' for i in range(num_topics)])
-        df.to_csv(os.path.join( output_dir, 'topic_distributions.csv'))
+        df.to_csv('topic_distributions.csv')
 
         print("Outputting topics and words to CSV...")
-        save_topics_to_csv(lda_model, num_words, os.path.join(output_dir,'topics_words.csv'))
+        save_topics_to_csv(lda_model, num_words, 'topics_words.csv')
 
         print("Outputting KL divergences to CSV...")
         kl_df = pd.DataFrame(kl_divergences, index=filenames, columns=['KL Divergence'])
-        kl_df.to_csv(os.path.join(output_dir, 'kl_divergences.csv'))
+        kl_df.to_csv('kl_divergences.csv')
         for i, kl_div in enumerate(kl_divergences):
             print(f'Document {filenames[i]}: KL Divergence = {kl_div}')
         

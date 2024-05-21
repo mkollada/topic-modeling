@@ -1,6 +1,5 @@
 import os
 import PyPDF2
-from nltk.tokenize import word_tokenize
 
 def get_text_from_pdf(file_path):
     _, ext = os.path.splitext(file_path)
@@ -30,17 +29,13 @@ def get_text_from_txt(file_path):
 
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read().strip()
-    
-# Load stop words from the local file
-def load_stopwords(file_path='topic_modeling/stopwords.txt'):
-    with open(file_path, 'r') as file:
-        stop_words = set(word.strip() for word in file.readlines())
-    return stop_words
-
-stop_words = load_stopwords()
 
 def preprocess_text(text):
+    from nltk.corpus import stopwords
+    from nltk.tokenize import word_tokenize
+    import string
     tokens = word_tokenize(text)
+    stop_words = set(stopwords.words('english'))
     tokens = [word for word in tokens if word.lower() not in stop_words]
     tokens = [word for word in tokens if len(word) > 2]  # Filter out short tokens
     tokens = [word for word in tokens if word.isalpha()]  # Filter out punctuation and numbers
