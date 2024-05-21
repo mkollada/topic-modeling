@@ -2,6 +2,7 @@ import argparse
 import time
 import os
 import pandas as pd
+import numpy as np
 from tqdm import tqdm
 from text_corpus import TextCorpusWithProgress
 from lda_model import train_lda_model, get_topic_distribution
