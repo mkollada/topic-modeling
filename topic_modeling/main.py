@@ -33,8 +33,10 @@ def main(directory, reference_file, num_topics=5, passes=15, no_below=1, no_abov
         print("Loading reference text...")
         reference_bow = text_corpus.dictionary.doc2bow(load_reference_text(reference_file))
         
+        lda_start = time.time()
         print("Training LDA model...")
         lda_model, corpus_length = train_lda_model(text_corpus, num_topics, passes)
+        print(f'Finished training LDA Model. Time taken: {time.time() - lda_start:.2f} seconds')
 
         if corpus_length == 0:
             print("The corpus is empty. Exiting...")
