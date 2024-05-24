@@ -68,9 +68,10 @@ topic_modeling/
 ├── data_preprocessing.py     # Functions for reading and preprocessing text from PDF and text files.
 ├── lda_model.py              # Functions for training the LDA model and getting topic distributions.
 ├── main.py                   # Main script to run the analysis.
-├── requirements.txt          # Python dependencies.
 ├── text_corpus.py            # Class definitions for handling text corpora.
 └── utils.py                  # Utility functions for KL divergence calculation and saving results.
+requirements.txt          # Python dependencies.
+
 ```
 
 ## Command Line Arguments
