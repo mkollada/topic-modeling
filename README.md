@@ -30,9 +30,9 @@ This project performs LDA-based topic modeling on PDF and text files in a direct
 
    Install the required Python packages using pip.
 
-   ''' 
+   ``` 
    pip install -r requirements.txt
-   '''
+   ```
 
 4. **Download NLTK data:**
 
