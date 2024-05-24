@@ -34,13 +34,6 @@ This project performs LDA-based topic modeling on PDF and text files in a direct
    pip install -r requirements.txt
    ```
 
-4. **Download NLTK data:**
-
-   Ensure necessary NLTK data is downloaded.
-
-   ``` 
-   python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
-   ```
 
 ## Usage
 
