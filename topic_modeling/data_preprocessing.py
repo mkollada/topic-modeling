@@ -1,7 +1,8 @@
 import os
 import PyPDF2
+from typing import List
 
-def get_text_from_pdf(file_path):
+def get_text_from_pdf(file_path: str) -> str:
     _, ext = os.path.splitext(file_path)
     if ext.lower() != '.pdf':
         raise ValueError(f'File must be a pdf. Got extension: {ext}')
@@ -22,7 +23,7 @@ def get_text_from_pdf(file_path):
     
     return doc_text.strip()
 
-def get_text_from_txt(file_path):
+def get_text_from_txt(file_path: str) -> str:
     _, ext = os.path.splitext(file_path)
     if ext.lower() != '.txt':
         raise ValueError(f'File must be a txt. Got extension: {ext}')
@@ -30,7 +31,7 @@ def get_text_from_txt(file_path):
     with open(file_path, 'r', encoding='utf-8') as file:
         return file.read().strip()
 
-def preprocess_text(text):
+def preprocess_text(text: str) -> List[str]:
     from nltk.corpus import stopwords
     from nltk.tokenize import word_tokenize
     import string
