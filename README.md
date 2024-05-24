@@ -57,7 +57,7 @@ This project performs LDA-based topic modeling on PDF and text files in a direct
    Example:
    
    ```
-   python topic_modeling/main.py data/ data/reference.pdf --num_topics 10 --passes 20 --no_below 5 --no_above 0.5 --minimum_topic_probability 0.01 --max_files 50 --num_words 15 --output_directory outputs
+   python topic_modeling/main.py data/document_directory/ data/reference.pdf --num_topics 10 --passes 20 --no_below 5 --no_above 0.5 --minimum_topic_probability 0.01 --max_files 50 --num_words 15 --output_directory outputs
    ```
 
 ## Project Structure
@@ -94,5 +94,3 @@ The script generates the following CSV files in the specified output directory:
 - `topic_distributions.csv`: Topic distributions for each document.
 - `topics_words.csv`: Top words for each topic.
 - `kl_divergences.csv`: KL divergence values for each document.
-- `reference_word_distribution.csv`: Word distribution for the reference document.
-- `topic_word_distributions.csv`: Word distributions for each topic in the reference document.

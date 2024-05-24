@@ -71,12 +71,6 @@ def main(directory: str, reference_file: str,
         print("Outputting topics and words to CSV...")
         save_topics_to_csv(lda_model, num_words, os.path.join(output_directory, 'topics_words.csv'))
         
-        print("Outputting reference word distribution to CSV...")
-        save_word_distribution_to_csv(reference_word_distribution, text_corpus.dictionary, os.path.join(output_directory, 'reference_word_distribution.csv'))
-
-        print("Outputting topic word distributions to CSV...")
-        save_topic_word_distributions_to_csv(topic_word_distributions, text_corpus.dictionary, os.path.join(output_directory, 'topic_word_distributions.csv'))
-        
         end_time = time.time()
         print(f"Total time taken: {end_time - start_time:.2f} seconds")
     
