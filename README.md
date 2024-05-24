@@ -19,14 +19,7 @@ This project performs LDA-based topic modeling on PDF and text files in a direct
    unzip topic_modeling.zip -d topic_modeling
    cd topic_modeling
 
-2. **Set up a virtual environment:**
-
-   It is recommended to use a virtual environment to manage dependencies.
-
-   python3 -m venv env
-   source env/bin/activate  # On Windows use `env\Scripts\activate`
-
-3. **Install dependencies:**
+2. **Install dependencies:**
 
    Install the required Python packages using pip.
 
