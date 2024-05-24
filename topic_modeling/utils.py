@@ -41,15 +41,9 @@ def get_topic_word_distributions(lda_model: LdaModel, num_topics: int, dictionar
     return topic_word_distributions
 
 def get_word_distribution(text: str, dictionary: Dictionary) -> np.ndarray:
-    print(f"Text length: {len(text)}")  # Debug print
     tokens = preprocess_text(text)
-    print(f"Tokens length: {len(tokens)}")  # Debug print
-
-    if not tokens:
-        print("No tokens found after preprocessing.")  # Debug print
 
     token_counts = Counter(tokens)
-    print(f"Token counts: {list(token_counts.items())[:10]}...")  # Debug print
 
     word_distribution = np.zeros(len(dictionary))
     for token, count in token_counts.items():
@@ -58,7 +52,7 @@ def get_word_distribution(text: str, dictionary: Dictionary) -> np.ndarray:
             word_distribution[word_id] = count
 
     if np.sum(word_distribution) == 0:
-        print("Warning: Word distribution sums to zero.")  # Debug print
+        print("Warning: Word distribution sums to zero.")  # 
     else:
         word_distribution = word_distribution / np.sum(word_distribution)  # Normalize the distribution
 

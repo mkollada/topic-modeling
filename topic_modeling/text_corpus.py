@@ -47,13 +47,13 @@ class TextCorpus:
                 text = get_text_from_txt(filepath)
             tokens = preprocess_text(text)
             if not tokens:
-                print(f"No tokens found for file: {filepath}")  # Debug print
+                print(f"No tokens found for file: {filepath}") 
             if not is_memory_usage_high():
                 self.preprocessed_texts[filepath] = tokens
             self.dictionary.add_documents([tokens])
-        print(f"Dictionary size before filtering: {len(self.dictionary)}")  # Debug print
+        print(f"Dictionary size before filtering: {len(self.dictionary)}")  
         self.dictionary.filter_extremes(no_below=self.no_below, no_above=self.no_above)  # Filter based on user input
-        print(f"Dictionary size after filtering: {len(self.dictionary)}")  # Debug print
+        print(f"Dictionary size after filtering: {len(self.dictionary)}")  
 
 class TextCorpusWithProgress(TextCorpus):
     def __iter__(self) -> Generator[List[tuple], None, None]:

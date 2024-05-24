@@ -38,10 +38,9 @@ def main(directory: str, reference_file: str,
 
         print("Loading reference text...")
         reference_text = load_reference_text(reference_file)
-        # print(reference_text)
-        reference_bow = text_corpus.dictionary.doc2bow(reference_text.split())
         reference_word_distribution = get_word_distribution(reference_text, text_corpus.dictionary)
-
+        print("Finished loading reference text.")
+        
         lda_start = time.time()
         print("Training LDA model...")
         lda_model, corpus_length = train_lda_model(text_corpus, num_topics, passes)
@@ -52,19 +51,14 @@ def main(directory: str, reference_file: str,
             return
 
         print("Calculating KL divergence for each topic in each document...")
-        # kl_divergences_matrix = []
 
         topic_word_distributions = get_topic_word_distributions(lda_model, num_topics, text_corpus.dictionary)
         kl_divergences = []
         for topic_id in range(num_topics):
-            print(topic_word_distributions[topic_id])
-            print('--')
             kl_div = calculate_kl_divergence(topic_word_distributions[topic_id], reference_word_distribution)
             kl_divergences.append(kl_div)
-            print(kl_div)
-        # kl_divergences_matrix.append(kl_di/vergences)/
         
-        print("Outputting KL divergences to CSV...")
+        print("KL Divergences Calculated. Outputting KL divergences to CSV...")
         filenames = [os.path.splitext(os.path.basename(filepath))[0] for filepath in text_corpus.filepaths]
         kl_df = pd.DataFrame(kl_divergences, index=[f'Topic {i+1}' for i in range(num_topics)])
         kl_df.to_csv(os.path.join(output_directory, 'kl_divergences.csv'))
@@ -87,7 +81,7 @@ def main(directory: str, reference_file: str,
         print(f"Total time taken: {end_time - start_time:.2f} seconds")
     
     except KeyboardInterrupt:
-        print("\nProcess interrupted. Exiting gracefully...")
+        print("\nKeyboard Interrupt. Exiting gracefully...")
         return
 
 if __name__ == "__main__":
