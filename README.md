@@ -38,7 +38,9 @@ This project performs LDA-based topic modeling on PDF and text files in a direct
 
    Ensure necessary NLTK data is downloaded.
 
+   ``` 
    python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords')"
+   ```
 
 ## Usage
 
@@ -53,11 +55,14 @@ This project performs LDA-based topic modeling on PDF and text files in a direct
    python topic_modeling/main.py path_to_directory_with_pdfs path_to_reference_file.pdf
 
    Example:
-
+   
+   ```
    python topic_modeling/main.py data/ data/reference.pdf --num_topics 10 --passes 20 --no_below 5 --no_above 0.5 --minimum_topic_probability 0.01 --max_files 50 --num_words 15 --output_directory outputs
+   ```
 
 ## Project Structure
 
+```
 topic_modeling/
 │
 ├── data_preprocessing.py     # Functions for reading and preprocessing text from PDF and text files.
@@ -66,6 +71,7 @@ topic_modeling/
 ├── requirements.txt          # Python dependencies.
 ├── text_corpus.py            # Class definitions for handling text corpora.
 └── utils.py                  # Utility functions for KL divergence calculation and saving results.
+```
 
 ## Command Line Arguments
 
