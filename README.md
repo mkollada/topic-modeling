@@ -78,6 +78,7 @@ requirements.txt          # Python dependencies.
 Required:
 - `directory` (str): Path to the directory containing PDF and text files.
 - `reference_file` (str): Path to the reference PDF or text file.
+
 Optional:
 - `--num_topics` (int): Number of topics for LDA. Default is 5.
 - `--passes` (int): Number of passes for LDA training. Default is 15.
