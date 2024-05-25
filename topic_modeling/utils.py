@@ -89,15 +89,12 @@ def get_word_distribution(text: str, dictionary: Dictionary) -> np.ndarray:
     Returns:
         np.ndarray: The normalized word distribution.
     """
-    print(f"Text length: {len(text)}")  # Debug print
     tokens = preprocess_text(text)
-    print(f"Tokens length: {len(tokens)}")  # Debug print
 
     if not tokens:
         print("No tokens found after preprocessing.")  # Debug print
 
     token_counts = Counter(tokens)
-    print(f"Token counts: {list(token_counts.items())[:10]}...")  # Debug print
 
     word_distribution = np.zeros(len(dictionary))
     for token, count in token_counts.items():

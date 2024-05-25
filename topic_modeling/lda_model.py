@@ -21,7 +21,6 @@ def train_lda_model(corpus: TextCorpus, num_topics: int, passes: int) -> Tuple[O
     corpus_length = sum(1 for _ in corpus)
     if corpus_length == 0:
         return None, 0
-    print(f"Corpus length: {corpus_length}")
     lda_model = models.LdaModel(corpus=corpus, num_topics=num_topics, id2word=corpus.dictionary, passes=passes, chunksize=max(1, corpus_length // 10))
     return lda_model, corpus_length
 
