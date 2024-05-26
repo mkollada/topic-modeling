@@ -8,6 +8,7 @@ from text_corpus import TextCorpusWithProgress
 from lda_model import train_lda_model, get_topic_distribution
 from utils import calculate_kl_divergence, save_topics_to_csv, load_reference_text, get_topic_word_distributions, get_word_distribution, save_word_distribution_to_csv, save_topic_word_distributions_to_csv
 import nltk
+import logging
 
 def download_nltk_data():
     nltk.download('punkt')
@@ -26,31 +27,31 @@ def main(directory: str, reference_file: str,
     os.makedirs(output_directory, exist_ok=True)
     
     try:
-        print("Initializing text corpus...")
+        logging.info("Initializing text corpus...")
         text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files)
 
-        print("Building dictionary...")
+        logging.info("Building dictionary...")
         text_corpus.build_dictionary()
 
         if len(text_corpus.dictionary) == 0:
-            print("The dictionary is empty. Exiting...")
+            logging.warning("The dictionary is empty. Exiting...")
             return
 
-        print("Loading reference text...")
+        logging.info("Loading reference text...")
         reference_text = load_reference_text(reference_file)
         reference_word_distribution = get_word_distribution(reference_text, text_corpus.dictionary)
-        print("Finished loading reference text.")
+        logging.info("Finished loading reference text.")
         
         lda_start = time.time()
-        print("Training LDA model...")
+        logging.info("Training LDA model...")
         lda_model, corpus_length = train_lda_model(text_corpus, num_topics, passes)
-        print(f'Finished training LDA Model. Time taken: {time.time() - lda_start:.2f} seconds')
+        logging.info(f'Finished training LDA Model. Time taken: {time.time() - lda_start:.2f} seconds')
 
         if corpus_length == 0:
-            print("The corpus is empty. Exiting...")
+            logging.warning("The corpus is empty. Exiting...")
             return
 
-        print("Calculating KL divergence for each topic in each document...")
+        logging.info("Calculating KL divergence for each topic in each document...")
 
         topic_word_distributions = get_topic_word_distributions(lda_model, num_topics, text_corpus.dictionary)
         kl_divergences = []
@@ -58,27 +59,38 @@ def main(directory: str, reference_file: str,
             kl_div = calculate_kl_divergence(topic_word_distributions[topic_id], reference_word_distribution)
             kl_divergences.append(kl_div)
         
-        print("KL Divergences Calculated. Outputting KL divergences to CSV...")
+        logging.info("KL Divergences Calculated. Outputting KL divergences to CSV...")
         filenames = [os.path.splitext(os.path.basename(filepath))[0] for filepath in text_corpus.filepaths]
         kl_df = pd.DataFrame(kl_divergences, index=[f'Topic {i+1}' for i in range(num_topics)])
         kl_df.to_csv(os.path.join(output_directory, 'kl_divergences.csv'))
 
-        print("Outputting topic distributions to CSV...")
+        logging.info("Outputting topic distributions to CSV...")
         topic_distributions = get_topic_distribution(lda_model, text_corpus, num_topics, minimum_topic_probability)
         df = pd.DataFrame(topic_distributions, index=filenames, columns=[f'Topic {i+1}' for i in range(num_topics)])
         df.to_csv(os.path.join(output_directory, 'topic_distributions.csv'))
 
-        print("Outputting topics and words to CSV...")
+        logging.info("Outputting topics and words to CSV...")
         save_topics_to_csv(lda_model, num_words, os.path.join(output_directory, 'topics_words.csv'))
         
         end_time = time.time()
-        print(f"Total time taken: {end_time - start_time:.2f} seconds")
+        logging.info(f"Total time taken: {end_time - start_time:.2f} seconds")
     
+    except Exception as e:
+        logging.error(f"An error occurred: {e}")
+        return
+
     except KeyboardInterrupt:
-        print("\nKeyboard Interrupt. Exiting gracefully...")
+        logging.error("\nKeyboard Interrupt. Exiting gracefully...")
         return
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
+                        handlers=[logging.StreamHandler(), logging.FileHandler("lda_processing.log", mode='w')])
+
+    # Set gensim logging to a higher level to suppress its logs
+    gensim_logger = logging.getLogger('gensim')
+    gensim_logger.setLevel(logging.WARNING)
+    
     parser = argparse.ArgumentParser(description='Perform LDA-based topic modeling and calculate KL divergence for PDFs and text files in a directory.')
     parser.add_argument('directory', type=str, help='Path to the directory containing PDF and text files.')
     parser.add_argument('reference_file', type=str, help='Path to the reference PDF or text file.')
@@ -93,6 +105,6 @@ if __name__ == "__main__":
     
     args = parser.parse_args()
 
-    print(f'Processing {len([os.path.join(args.directory, filename) for filename in os.listdir(args.directory) if filename.endswith(('.pdf', '.txt'))])} files in directory: {args.directory}')
+    logging.info(f'Processing {len([os.path.join(args.directory, filename) for filename in os.listdir(args.directory) if filename.endswith(('.pdf', '.txt'))])} files in directory: {args.directory}')
     
     main(args.directory, args.reference_file, args.num_topics, args.passes, args.no_below, args.no_above, args.minimum_topic_probability, args.max_files, args.num_words, args.output_directory)

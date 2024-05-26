@@ -1,13 +1,16 @@
 import os
 import PyPDF2
-from typing import List
 import signal
+import logging
+from typing import List
 
 class TimeoutException(Exception):
     pass
 
 def timeout_handler(signum, frame):
     raise TimeoutException
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_text_from_pdf(file_path: str) -> str:
     """
@@ -46,10 +49,10 @@ def get_text_from_pdf(file_path: str) -> str:
     try:
         text = read_pdf()
     except TimeoutException:
-        print(f"Timeout: Skipping {file_path}")
+        logging.error(f"Timeout: Skipping {file_path}")
         return ''
     except Exception as e:
-        print(f"Error reading {file_path}: {e}")
+        logging.error(f"Error reading {file_path}: {e}")
         return ''
     finally:
         signal.alarm(0)  # Disable the alarm
@@ -80,10 +83,10 @@ def get_text_from_txt(file_path: str) -> str:
     try:
         text = read_txt()
     except TimeoutException:
-        print(f"Timeout: Skipping {file_path}")
+        logging.error(f"Timeout: Skipping {file_path}")
         return ''
     except Exception as e:
-        print(f"Error reading {file_path}: {e}")
+        logging.error(f"Error reading {file_path}: {e}")
         return ''
     finally:
         signal.alarm(0)  # Disable the alarm

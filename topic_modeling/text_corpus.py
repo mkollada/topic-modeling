@@ -1,4 +1,5 @@
 import os
+import logging
 from tqdm import tqdm
 from gensim import corpora
 from data_preprocessing import get_text_from_pdf, get_text_from_txt, preprocess_text
@@ -6,6 +7,8 @@ import psutil
 from typing import List, Dict, Optional, Generator
 
 MEMORY_THRESHOLD = 80
+
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def is_memory_usage_high(threshold: int = MEMORY_THRESHOLD) -> bool:
     """
@@ -75,13 +78,13 @@ class TextCorpus:
             if text:
                 tokens = preprocess_text(text)
                 if not tokens:
-                    print(f"No tokens found for file: {filepath}") 
+                    logging.warning(f"No tokens found for file: {filepath}")
                 if not is_memory_usage_high():
                     self.preprocessed_texts[filepath] = tokens
                 self.dictionary.add_documents([tokens])
-        print(f"Dictionary size before filtering: {len(self.dictionary)}")  
+        logging.info(f"Dictionary size before filtering: {len(self.dictionary)}")
         self.dictionary.filter_extremes(no_below=self.no_below, no_above=self.no_above)  # Filter based on user input
-        print(f"Dictionary size after filtering: {len(self.dictionary)}")  
+        logging.info(f"Dictionary size after filtering: {len(self.dictionary)}")
 
 class TextCorpusWithProgress(TextCorpus):
     def __iter__(self) -> Generator[List[tuple], None, None]:

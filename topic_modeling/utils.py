@@ -6,6 +6,7 @@ from collections import Counter
 from gensim.models import LdaModel
 from gensim.corpora import Dictionary
 from data_preprocessing import get_text_from_pdf, get_text_from_txt, preprocess_text
+import logging
 
 def calculate_kl_divergence(dist1: np.ndarray, dist2: np.ndarray) -> float:
     """
@@ -33,7 +34,7 @@ def save_topics_to_csv(lda_model: LdaModel, num_words: int, file_name: str) -> N
         num_words (int): The number of words to save per topic.
         file_name (str): The file name to save the topics.
     """
-    print(f"Saving topics to {file_name}...")
+    logging.info(f"Saving topics to {file_name}...")
     topics = lda_model.show_topics(num_topics=-1, num_words=num_words, formatted=False)
     topics_words = [[word for word, _ in topic[1]] for topic in topics]
     df = pd.DataFrame(topics_words, columns=[f'Word {i+1}' for i in range(num_words)])
@@ -48,7 +49,7 @@ def load_reference_text(reference_file: str) -> str:
         reference_file (str): The reference file path.
     
     Returns:
-        str: The loaded  reference text.
+        str: The loaded reference text.
     """
     ext = os.path.splitext(reference_file)[1].lower()
     if ext == '.pdf':
@@ -92,7 +93,7 @@ def get_word_distribution(text: str, dictionary: Dictionary) -> np.ndarray:
     tokens = preprocess_text(text)
 
     if not tokens:
-        print("No tokens found after preprocessing.")  # Debug print
+        logging.warning("No tokens found after preprocessing.")  # Debug print
 
     token_counts = Counter(tokens)
 
@@ -103,7 +104,7 @@ def get_word_distribution(text: str, dictionary: Dictionary) -> np.ndarray:
             word_distribution[word_id] = count
 
     if np.sum(word_distribution) == 0:
-        print("Warning: Word distribution sums to zero.")  # Debug print
+        logging.warning("Warning: Word distribution sums to zero.")  # Debug print
     else:
         word_distribution = word_distribution / np.sum(word_distribution)  # Normalize the distribution
 
@@ -118,7 +119,7 @@ def save_word_distribution_to_csv(word_distribution: np.ndarray, dictionary: Dic
         dictionary (Dictionary): The Gensim dictionary.
         file_name (str): The file name to save the distribution.
     """
-    print(f"Saving word distribution to {file_name}...")
+    logging.info(f"Saving word distribution to {file_name}...")
     words = [dictionary[i] for i in range(len(dictionary))]
     df = pd.DataFrame(word_distribution, index=words, columns=['Probability'])
     df.index.name = 'Word'
@@ -133,7 +134,7 @@ def save_topic_word_distributions_to_csv(topic_word_distributions: list, diction
         dictionary (Dictionary): The Gensim dictionary.
         file_name (str): The file name to save the distributions.
     """
-    print(f"Saving topic word distributions to {file_name}...")
+    logging.info(f"Saving topic word distributions to {file_name}...")
     words = [dictionary[i] for i in range(len(dictionary))]
     df = pd.DataFrame(topic_word_distributions, columns=words)
     df.index.name = 'Topic'
