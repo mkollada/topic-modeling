@@ -1,6 +1,5 @@
 import os
 import PyPDF2
-import signal
 import logging
 from typing import List
 
@@ -43,19 +42,12 @@ def get_text_from_pdf(file_path: str) -> str:
         
         return doc_text.strip()
 
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(10)  # Set the timeout to 10 seconds
 
     try:
         text = read_pdf()
-    except TimeoutException:
-        logging.error(f"Timeout: Skipping {file_path}")
-        return ''
     except Exception as e:
         logging.error(f"Error reading {file_path}: {e}")
         return ''
-    finally:
-        signal.alarm(0)  # Disable the alarm
 
     return text
 
@@ -77,19 +69,12 @@ def get_text_from_txt(file_path: str) -> str:
         with open(file_path, 'r', encoding='utf-8') as file:
             return file.read().strip()
 
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(10)  # Set the timeout to 10 seconds
 
     try:
         text = read_txt()
-    except TimeoutException:
-        logging.error(f"Timeout: Skipping {file_path}")
-        return ''
     except Exception as e:
         logging.error(f"Error reading {file_path}: {e}")
         return ''
-    finally:
-        signal.alarm(0)  # Disable the alarm
 
     return text
 
