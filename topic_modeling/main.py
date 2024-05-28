@@ -9,15 +9,15 @@ from lda_model import train_lda_model, get_topic_distribution
 from utils import calculate_kl_divergence, save_topics_to_csv, load_reference_text, get_topic_word_distributions, get_word_distribution, save_word_distribution_to_csv, save_topic_word_distributions_to_csv
 import nltk
 import logging
+from typing import Optional
 
 def download_nltk_data():
     nltk.download('punkt')
     nltk.download('stopwords')
 
-def main(directory: str, reference_file: str, 
-         num_topics: int = 5, passes: int = 15, no_below: int = 1, 
-         no_above: float = 0.9, minimum_topic_probability: float = 0, 
-         max_files: int | None = None, num_words: int = 10, output_directory: str = 'outputs') -> None:
+def main(directory: str, reference_file: str, num_topics: int = 5, passes: int = 15, no_below: int = 1, 
+         no_above: float = 0.9, minimum_topic_probability: float = 0, max_files: Optional[int] = None, 
+         num_words: int = 10, output_directory: str = 'outputs', cache_file: Optional[str] = 'text_corpus_cache.json') -> None:
     # Ensure necessary NLTK data is downloaded
     download_nltk_data()
 
@@ -28,7 +28,7 @@ def main(directory: str, reference_file: str,
     
     try:
         logging.info("Initializing text corpus...")
-        text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files)
+        text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files, cache_file=cache_file)
 
         logging.info("Building dictionary...")
         text_corpus.build_dictionary()
@@ -86,11 +86,9 @@ def main(directory: str, reference_file: str,
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
                         handlers=[logging.StreamHandler(), logging.FileHandler("lda_processing.log", mode='w')])
+    logging.getLogger('gensim').setLevel(logging.ERROR)
+    logging.getLogger('lda_model').setLevel(logging.ERROR)
 
-    # Set gensim logging to a higher level to suppress its logs
-    gensim_logger = logging.getLogger('gensim')
-    gensim_logger.setLevel(logging.WARNING)
-    
     parser = argparse.ArgumentParser(description='Perform LDA-based topic modeling and calculate KL divergence for PDFs and text files in a directory.')
     parser.add_argument('directory', type=str, help='Path to the directory containing PDF and text files.')
     parser.add_argument('reference_file', type=str, help='Path to the reference PDF or text file.')
@@ -100,11 +98,12 @@ if __name__ == "__main__":
     parser.add_argument('--no_above', type=float, default=0.9, help='Filter out tokens that appear in more than no_above proportion of documents. Default is 0.9.')
     parser.add_argument('--minimum_topic_probability', type=float, default=0, help='Minimum topic probability to include in the results. Default is 0.')
     parser.add_argument('--max_files', type=int, default=None, help='Maximum number of files to process. Default is None (process all files).')
-    parser.add_argument('--num_words', type=int, default=25, help='Number of words per topic to save in the CSV. Default is 10.')
+    parser.add_argument('--num_words', type=int, default=10, help='Number of words per topic to save in the CSV. Default is 10.')
     parser.add_argument('--output_directory', type=str, default='outputs', help='Directory to save output CSV files. Default is "outputs".')
+    parser.add_argument('--cache_file', type=str, default=None, help='Path to the cache file to save/load processed text data. Default is None.')
     
     args = parser.parse_args()
 
     logging.info(f'Processing {len([os.path.join(args.directory, filename) for filename in os.listdir(args.directory) if filename.endswith(('.pdf', '.txt'))])} files in directory: {args.directory}')
     
-    main(args.directory, args.reference_file, args.num_topics, args.passes, args.no_below, args.no_above, args.minimum_topic_probability, args.max_files, args.num_words, args.output_directory)
+    main(args.directory, args.reference_file, args.num_topics, args.passes, args.no_below, args.no_above, args.minimum_topic_probability, args.max_files, args.num_words, args.output_directory, args.cache_file)
