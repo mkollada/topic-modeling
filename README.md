@@ -74,6 +74,7 @@ Optional:
 - `--max_files` (int): Maximum number of files to process. Default is None (process all files).
 - `--num_words` (int): Number of words per topic to save in the CSV. Default is 10.
 - `--output_directory` (str): Directory to save output CSV files. Default is "outputs".
+- `--cache_file` (str): Path to the cache file to save/load processed text data. Default is None.
 
 ## Output
 
@@ -82,3 +83,5 @@ The script generates the following CSV files in the specified output directory:
 - `topic_distributions.csv`: Topic distributions for each document.
 - `topics_words.csv`: Top words for each topic.
 - `kl_divergences.csv`: KL divergence values for each document.
+- `skipped_files.csv`: A csv of the document files that were skipped during processing
+- `lda_processing.log`: A log output by the code documenting the process of the pipeline

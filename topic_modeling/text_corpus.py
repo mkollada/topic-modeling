@@ -6,10 +6,9 @@ from gensim import corpora
 from data_preprocessing import get_text_from_pdf, get_text_from_txt, preprocess_text
 import psutil
 from typing import List, Dict, Optional, Generator
+from data_preprocessing import log_skipped_file
 
 MEMORY_THRESHOLD = 80
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def is_memory_usage_high(threshold: int = MEMORY_THRESHOLD) -> bool:
     """
@@ -54,7 +53,7 @@ class TextCorpus:
 
         self.dictionary = corpora.Dictionary()
 
-        all_filepaths = [os.path.join(directory, filename) for filename in os.listdir(directory) if filename.endswith(('.pdf', '.txt'))]
+        all_filepaths = [os.path.join(directory, filename) for filename in os.listdir(directory)]
         if max_files is not None:
             all_filepaths = all_filepaths[:max_files]
 
@@ -65,6 +64,9 @@ class TextCorpus:
                 text = get_text_from_pdf(filepath)
             elif ext == '.txt':
                 text = get_text_from_txt(filepath)
+            else:
+                # print(f'Skipping file {filepath}')
+                log_skipped_file(filepath, f'File type: {ext} not supported')
             if text:
                 tokens = preprocess_text(text)
                 if not is_memory_usage_high():

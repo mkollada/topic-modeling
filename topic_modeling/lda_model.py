@@ -5,8 +5,6 @@ import numpy as np
 from typing import Tuple, List, Optional
 from text_corpus import TextCorpus
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
 def train_lda_model(corpus: TextCorpus, num_topics: int, passes: int) -> Tuple[Optional[models.LdaModel], int]:
     """
     Trains an LDA model on the given corpus.

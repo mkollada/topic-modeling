@@ -1,7 +1,8 @@
 import os
 import PyPDF2
-import logging
+import csv
 from typing import List
+from datetime import datetime
 
 class TimeoutException(Exception):
     pass
@@ -9,7 +10,23 @@ class TimeoutException(Exception):
 def timeout_handler(signum, frame):
     raise TimeoutException
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+# Create a specific logger for file processing
+log_filename = 'outputs/skipped_files.csv'
+
+def initialize_csv_log():
+    if not os.path.exists(log_filename):
+        with open(log_filename, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['filename', 'read_failure_reason', 'timestamp'])
+
+def log_skipped_file(filename: str, reason: str):
+    print(f'Skipping file {filename}')
+    with open(log_filename, mode='a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow([filename, reason, datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
+
+initialize_csv_log()
 
 def get_text_from_pdf(file_path: str) -> str:
     """
@@ -42,11 +59,10 @@ def get_text_from_pdf(file_path: str) -> str:
         
         return doc_text.strip()
 
-
     try:
         text = read_pdf()
     except Exception as e:
-        logging.error(f"Error reading {file_path}: {e}")
+        log_skipped_file(file_path, str(e))
         return ''
 
     return text
@@ -69,11 +85,10 @@ def get_text_from_txt(file_path: str) -> str:
         with open(file_path, 'r', encoding='utf-8') as file:
             return file.read().strip()
 
-
     try:
         text = read_txt()
     except Exception as e:
-        logging.error(f"Error reading {file_path}: {e}")
+        log_skipped_file(file_path, str(e))
         return ''
 
     return text

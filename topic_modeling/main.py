@@ -85,7 +85,7 @@ def main(directory: str, reference_file: str, num_topics: int = 5, passes: int =
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
-                        handlers=[logging.StreamHandler(), logging.FileHandler("lda_processing.log", mode='w')])
+                        handlers=[logging.StreamHandler(), logging.FileHandler("outputs/lda_processing.log", mode='w')])
     logging.getLogger('gensim').setLevel(logging.ERROR)
     logging.getLogger('lda_model').setLevel(logging.ERROR)
 
