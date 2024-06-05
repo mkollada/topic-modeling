@@ -85,3 +85,14 @@ The script generates the following CSV files in the specified output directory:
 - `kl_divergences.csv`: KL divergence values for each document.
 - `skipped_files.csv`: A csv of the document files that were skipped during processing
 - `lda_processing.log`: A log output by the code documenting the process of the pipeline
+
+## Note on `--cache_file` argument:
+
+This argument can save significant time when running the code on the same set of documents again, or when augmenting a set of documents that you've already processed.
+
+Setting this argument either:
+
+- Creates a dictionary cache file if one with that name does not exist
+- Reads in the dictionary cache if a file with that name already exisis
+
+Set a new cache file name or don't use this argument if you're using a new dataset
