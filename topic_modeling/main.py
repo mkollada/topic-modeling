@@ -10,6 +10,7 @@ from utils import calculate_kl_divergence, save_topics_to_csv, load_reference_te
 import nltk
 import logging
 from typing import Optional
+from data_preprocessing import initialize_csv_log
 
 def download_nltk_data():
     nltk.download('punkt')
@@ -25,6 +26,8 @@ def main(directory: str, reference_file: str, num_topics: int = 5, passes: int =
     
     # Create output directory if it does not exist
     os.makedirs(output_directory, exist_ok=True)
+    log_filename = os.path.join( output_directory, 'skipped_files.csv')
+    initialize_csv_log(log_filename)
     
     try:
         logging.info("Initializing text corpus...")
@@ -38,7 +41,7 @@ def main(directory: str, reference_file: str, num_topics: int = 5, passes: int =
             return
 
         logging.info("Loading reference text...")
-        reference_text = load_reference_text(reference_file)
+        reference_text = load_reference_text(reference_file, log_filename)
         reference_word_distribution = get_word_distribution(reference_text, text_corpus.dictionary)
         logging.info("Finished loading reference text.")
         

@@ -11,24 +11,19 @@ def timeout_handler(signum, frame):
     raise TimeoutException
 
 
-# Create a specific logger for file processing
-log_filename = 'outputs/skipped_files.csv'
-
-def initialize_csv_log():
+def initialize_csv_log(log_filename):
     if not os.path.exists(log_filename):
         with open(log_filename, mode='w', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(['filename', 'read_failure_reason', 'timestamp'])
 
-def log_skipped_file(filename: str, reason: str):
+def log_skipped_file(filename: str, reason: str, log_filename: str):
     print(f'Skipping file {filename}')
     with open(log_filename, mode='a', newline='') as file:
         writer = csv.writer(file)
         writer.writerow([filename, reason, datetime.now().strftime('%Y-%m-%d %H:%M:%S')])
 
-initialize_csv_log()
-
-def get_text_from_pdf(file_path: str) -> str:
+def get_text_from_pdf(file_path: str, log_filename:str) -> str:
     """
     Extracts text from a PDF file.
     
@@ -62,12 +57,12 @@ def get_text_from_pdf(file_path: str) -> str:
     try:
         text = read_pdf()
     except Exception as e:
-        log_skipped_file(file_path, str(e))
+        log_skipped_file(file_path, str(e), log_filename)
         return ''
 
     return text
 
-def get_text_from_txt(file_path: str) -> str:
+def get_text_from_txt(file_path: str, log_filename: str) -> str:
     """
     Extracts text from a TXT file.
     
@@ -88,7 +83,7 @@ def get_text_from_txt(file_path: str) -> str:
     try:
         text = read_txt()
     except Exception as e:
-        log_skipped_file(file_path, str(e))
+        log_skipped_file(file_path, str(e), log_filename)
         return ''
 
     return text

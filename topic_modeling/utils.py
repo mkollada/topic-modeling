@@ -41,7 +41,7 @@ def save_topics_to_csv(lda_model: LdaModel, num_words: int, file_name: str) -> N
     df.index.name = 'Topic'
     df.to_csv(file_name)
 
-def load_reference_text(reference_file: str) -> str:
+def load_reference_text(reference_file: str, log_filename: str) -> str:
     """
     Loads the reference text from a file.
     
@@ -53,9 +53,9 @@ def load_reference_text(reference_file: str) -> str:
     """
     ext = os.path.splitext(reference_file)[1].lower()
     if ext == '.pdf':
-        reference_text = get_text_from_pdf(reference_file)
+        reference_text = get_text_from_pdf(reference_file, log_filename)
     elif ext == '.txt':
-        reference_text = get_text_from_txt(reference_file)
+        reference_text = get_text_from_txt(reference_file, log_filename)
     return reference_text  # Convert list of tokens back to a string
 
 def get_topic_word_distributions(lda_model: LdaModel, num_topics: int, dictionary: Dictionary) -> list:

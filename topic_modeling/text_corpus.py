@@ -24,10 +24,8 @@ def is_memory_usage_high(threshold: int = MEMORY_THRESHOLD) -> bool:
     return memory_info.percent > threshold
 
 class TextCorpus:
-    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, cache_file: Optional[str] = None):
+    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, cache_file: Optional[str] = None, log_filename: str = 'outputs/skipped_files.csv'):
         """
-        Initializes the TextCorpus with a directory and filtering parameters.
-        
         Args:
             directory (str): The directory containing the text files.
             no_below (int): Minimum number of documents a token must appear in.
@@ -42,6 +40,7 @@ class TextCorpus:
         self.skipped_filepaths = []
         self.preprocessed_texts: Dict[str, List[str]] = {}
         self.cache_file = cache_file
+        self.log_filename = log_filename
 
         # Load the cache if the file exists
         if cache_file and os.path.exists(cache_file):
@@ -61,12 +60,12 @@ class TextCorpus:
         for filepath in tqdm(new_filepaths, desc="Processing new files", unit="file"):
             ext = os.path.splitext(filepath)[1].lower()
             if ext == '.pdf':
-                text = get_text_from_pdf(filepath)
+                text = get_text_from_pdf(filepath, self.log_filename)
             elif ext == '.txt':
-                text = get_text_from_txt(filepath)
+                text = get_text_from_txt(filepath, self.log_filename)
             else:
                 # print(f'Skipping file {filepath}')
-                log_skipped_file(filepath, f'File type: {ext} not supported')
+                log_skipped_file(filepath, f'File type: {ext} not supported', self.log_filename)
             if text:
                 tokens = preprocess_text(text)
                 if not is_memory_usage_high():
