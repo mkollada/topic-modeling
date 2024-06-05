@@ -120,7 +120,7 @@ class TextCorpus:
             logging.info(f"Saved cache to {self.cache_file}")
 
 class TextCorpusWithProgress(TextCorpus):
-    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, cache_file: Optional[str] = None):
+    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, cache_file: Optional[str] = None, log_filename: str = 'outputs/skipped_files.csv'):
         """
         Initializes the TextCorpusWithProgress with a directory and filtering parameters.
         
@@ -131,7 +131,7 @@ class TextCorpusWithProgress(TextCorpus):
             max_files (Optional[int]): Maximum number of files to process.
             cache_file (Optional[str]): Path to a file where the cache should be saved or loaded from.
         """
-        super().__init__(directory, no_below, no_above, max_files, cache_file)
+        super().__init__(directory, no_below, no_above, max_files, cache_file, log_filename)
 
     def __iter__(self) -> Generator[List[tuple], None, None]:
         """

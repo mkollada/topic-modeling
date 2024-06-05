@@ -24,14 +24,12 @@ def main(directory: str, reference_file: str, num_topics: int = 5, passes: int =
 
     start_time = time.time()
     
-    # Create output directory if it does not exist
-    os.makedirs(output_directory, exist_ok=True)
     log_filename = os.path.join( output_directory, 'skipped_files.csv')
     initialize_csv_log(log_filename)
     
     try:
         logging.info("Initializing text corpus...")
-        text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files, cache_file=cache_file)
+        text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files, cache_file=cache_file, log_filename=log_filename)
 
         logging.info("Building dictionary...")
         text_corpus.build_dictionary()
@@ -87,10 +85,8 @@ def main(directory: str, reference_file: str, num_topics: int = 5, passes: int =
         return
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
-                        handlers=[logging.StreamHandler(), logging.FileHandler("outputs/lda_processing.log", mode='w')])
-    logging.getLogger('gensim').setLevel(logging.ERROR)
-    logging.getLogger('lda_model').setLevel(logging.ERROR)
+
+    print('boop')
 
     parser = argparse.ArgumentParser(description='Perform LDA-based topic modeling and calculate KL divergence for PDFs and text files in a directory.')
     parser.add_argument('directory', type=str, help='Path to the directory containing PDF and text files.')
@@ -106,6 +102,16 @@ if __name__ == "__main__":
     parser.add_argument('--cache_file', type=str, default=None, help='Path to the cache file to save/load processed text data. Default is None.')
     
     args = parser.parse_args()
+
+    print(args.output_directory)
+
+    # Create output directory if it does not exist
+    os.makedirs(args.output_directory, exist_ok=True)
+
+    logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
+                        handlers=[logging.StreamHandler(), logging.FileHandler(f'{args.output_directory}/lda_processing.log', mode='w')])
+    logging.getLogger('gensim').setLevel(logging.ERROR)
+    logging.getLogger('lda_model').setLevel(logging.ERROR)
 
     logging.info(f'Processing {len([os.path.join(args.directory, filename) for filename in os.listdir(args.directory) if filename.endswith(('.pdf', '.txt'))])} files in directory: {args.directory}')
     
