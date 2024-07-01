@@ -5,26 +5,27 @@ import numpy as np
 from typing import Tuple, List, Optional
 from text_corpus import TextCorpus
 
-def train_lda_model(corpus: TextCorpus, num_topics: int, passes: int) -> Tuple[Optional[models.LdaModel], int]:
+def train_lda_model(corpus: TextCorpus, num_topics: int, passes: int, workers: int) -> Tuple[Optional[models.LdaMulticore], int]:
     """
-    Trains an LDA model on the given corpus.
+    Trains an LDA model on the given corpus using multiple cores.
     
     Args:
         corpus (TextCorpus): The text corpus.
         num_topics (int): The number of topics.
         passes (int): The number of passes for LDA training.
+        workers (int): The number of worker threads to use for training.
     
     Returns:
-        Tuple[Optional[models.LdaModel], int]: A tuple containing the trained LDA model and the length of the corpus.
-                                                Returns (None, 0) if the corpus is empty.
+        Tuple[Optional[models.LdaMulticore], int]: A tuple containing the trained LDA model and the length of the corpus.
+                                                   Returns (None, 0) if the corpus is empty.
     """
     # Check the length of the corpus
     corpus_length = sum(1 for _ in corpus)
     if corpus_length == 0:
         logging.warning("The corpus is empty. Exiting training.")
         return None, 0
-    logging.info(f"Training LDA model with {num_topics} topics and {passes} passes...")
-    lda_model = models.LdaModel(corpus=corpus, num_topics=num_topics, id2word=corpus.dictionary, passes=passes, chunksize=max(1, corpus_length // 10))
+    logging.info(f"Training LDA model with {num_topics} topics, {passes} passes, and {workers} workers...")
+    lda_model = models.LdaMulticore(corpus=corpus, num_topics=num_topics, id2word=corpus.dictionary, passes=passes, workers=workers, chunksize=max(1, corpus_length // 10))
     logging.info("LDA model training completed.")
     return lda_model, corpus_length
 
