@@ -98,7 +98,7 @@ if __name__ == "__main__":
     parser.add_argument('--num_words', type=int, default=10, help='Number of words per topic to save in the CSV. Default is 10.')
     parser.add_argument('--output_directory', type=str, default='outputs', help='Directory to save output CSV files. Default is "outputs".')
     parser.add_argument('--cache_file', type=str, default=None, help='Path to the cache file to save/load processed text data. Default is None.')
-    parser.add_argument('--num_workers', type=int, default=4, help='Number of worker threads to use for both corpus creation and LDA training. Default is 4.')
+    parser.add_argument('--num_workers', type=int, default=7, help='Number of worker threads to use for both corpus creation and LDA training. Default is 4.')
     
     args = parser.parse_args()
 

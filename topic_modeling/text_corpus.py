@@ -51,7 +51,7 @@ def process_file(filepath: str, log_filename: str) -> Optional[Dict[str, List[st
     return None
 
 class TextCorpus:
-    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, cache_file: Optional[str] = None, log_filename: str = 'outputs/skipped_files.csv', num_workers: int = 4):
+    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, cache_file: Optional[str] = None, log_filename: str = 'outputs/skipped_files.csv', num_workers: int = 7):
         """
         Args:
             directory (str): The directory containing the text files.
