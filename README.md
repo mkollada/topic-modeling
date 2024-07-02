@@ -75,7 +75,7 @@ Optional:
 - `--num_words` (int): Number of words per topic to save in the CSV. Default is 10.
 - `--output_directory` (str): Directory to save output CSV files. Default is "outputs".
 - `--cache_file` (str): Path to the cache file to save/load processed text data. Default is None.
-- `--num_workers` (int): Number of CPUs available for parallel processings
+- `--num_workers` (int): Number of CPUs available for parallel processing
 
 ## Output
 
