@@ -43,7 +43,7 @@ This project performs LDA-based topic modeling on PDF and text files in a direct
    Example:
    
    ```
-   python topic_modeling/main.py data/document_directory/ data/reference.pdf --num_topics 10 --passes 20 --no_below 5 --no_above 0.5 --minimum_topic_probability 0.01 --max_files 50 --num_words 15 --output_directory outputs
+   python topic_modeling/main.py data/document_directory/ data/reference.pdf --num_topics 10 --passes 20 --no_below 5 --no_above 0.5 --minimum_topic_probability 0.01 --max_files 50 --num_words 15 --output_directory outputs --num_workers 7
    ```
 
 ## Project Structure
@@ -75,6 +75,7 @@ Optional:
 - `--num_words` (int): Number of words per topic to save in the CSV. Default is 10.
 - `--output_directory` (str): Directory to save output CSV files. Default is "outputs".
 - `--cache_file` (str): Path to the cache file to save/load processed text data. Default is None.
+- `--num_workers` (int): Number of CPUs available for parallel processings
 
 ## Output
 
