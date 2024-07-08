@@ -76,6 +76,7 @@ Optional:
 - `--output_directory` (str): Directory to save output CSV files. Default is "outputs".
 - `--cache_file` (str): Path to the cache file to save/load processed text data. Default is None.
 - `--num_workers` (int): Number of CPUs available for parallel processing
+- `--dict_size` (int): Number of words to limit the dictionary size to
 
 ## Output
 
@@ -97,3 +98,10 @@ Setting this argument either:
 - Reads in the dictionary cache if a file with that name already exisis
 
 Set a new cache file name or don't use this argument if you're using a new dataset
+
+## Note on `--dict_size` argument:
+
+When limiting the dictionary size using this argument its important to consider how the dictionary is made smaller to get desired characteristics.
+
+The dictionary will use the top <dict_size> words in terms of frequency AFTER filtering with the `no_below` and `no_above` parameters. Thus those two parameters should be considered when using the `--dict_size` argument.
+
