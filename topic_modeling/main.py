@@ -11,6 +11,30 @@ import nltk
 import logging
 from typing import Optional
 from data_preprocessing import initialize_csv_log
+import re
+
+class GensimProgressFilter(logging.Filter):
+    def filter(self, record):
+        message = record.getMessage()
+        return not (('topic' in message) or ('merging' in message))
+
+class TqdmLoggingHandler(logging.Handler):
+    def __init__(self, total_passes):
+        super().__init__()
+        self.total_passes = total_passes
+        self.progress_bar = tqdm(total=self.total_passes, desc='LDA Training Progress')
+
+    def emit(self, record):
+        log_entry = self.format(record)
+        match = re.search(r'PROGRESS: pass (\d+)', log_entry)
+        if match:
+            current_pass = int(match.group(1))
+            self.progress_bar.n = current_pass + 1  # update to the current pass
+            self.progress_bar.refresh()
+
+    def close(self):
+        self.progress_bar.close()
+        super().close()
 
 def download_nltk_data():
     nltk.download('punkt')
@@ -98,16 +122,32 @@ if __name__ == "__main__":
     parser.add_argument('--num_words', type=int, default=10, help='Number of words per topic to save in the CSV. Default is 10.')
     parser.add_argument('--output_directory', type=str, default='outputs', help='Directory to save output CSV files. Default is "outputs".')
     parser.add_argument('--cache_file', type=str, default=None, help='Path to the cache file to save/load processed text data. Default is None.')
-    parser.add_argument('--num_workers', type=int, default=7, help='Number of worker threads to use for both corpus creation and LDA training. Default is 4.')
+    parser.add_argument('--num_workers', type=int, default=4, help='Number of worker threads to use for both corpus creation and LDA training. Default is 4.')
     
     args = parser.parse_args()
 
     # Create output directory if it does not exist
     os.makedirs(args.output_directory, exist_ok=True)
 
+    # Setting up logging
     logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s',
                         handlers=[logging.StreamHandler(), logging.FileHandler(f'{args.output_directory}/lda_processing.log', mode='w')])
-    logging.getLogger('gensim').setLevel(logging.ERROR)
+
+    # Set gensim logger to INFO level and add a custom progress handler with a filter
+    gensim_logger = logging.getLogger('gensim')
+    gensim_logger.setLevel(logging.INFO)
+    gensim_progress_handler = TqdmLoggingHandler(total_passes=args.passes)
+    gensim_progress_filter = GensimProgressFilter()
+    gensim_logger.addFilter(gensim_progress_filter)
+    gensim_progress_handler.addFilter(gensim_progress_filter)
+    gensim_logger.addHandler(gensim_progress_handler)
+
+    for handler in logging.getLogger().handlers:
+        handler.addFilter(gensim_progress_filter)
+        gensim_logger.addHandler(handler)
+
+
+  
     logging.getLogger('lda_model').setLevel(logging.ERROR)
 
     logging.info(f'Processing {len([os.path.join(args.directory, filename) for filename in os.listdir(args.directory) if filename.endswith(('.pdf', '.txt'))])} files in directory: {args.directory}')
