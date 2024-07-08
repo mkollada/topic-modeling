@@ -43,7 +43,7 @@ def download_nltk_data():
 def main(directory: str, reference_file: str, num_topics: int = 5, passes: int = 15, no_below: int = 1, 
          no_above: float = 0.9, minimum_topic_probability: float = 0, max_files: Optional[int] = None, 
          num_words: int = 10, output_directory: str = 'outputs', cache_file: Optional[str] = 'text_corpus_cache.json',
-         num_workers: int = 4) -> None:
+         num_workers: int = 4, keep_n: Optional[int] = None) -> None:
     # Ensure necessary NLTK data is downloaded
     download_nltk_data()
 
@@ -54,7 +54,7 @@ def main(directory: str, reference_file: str, num_topics: int = 5, passes: int =
     
     try:
         logging.info("Initializing text corpus...")
-        text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files, cache_file=cache_file, log_filename=log_filename, num_workers=num_workers)
+        text_corpus = TextCorpusWithProgress(directory, no_below=no_below, no_above=no_above, max_files=max_files, keep_n=keep_n, cache_file=cache_file, log_filename=log_filename, num_workers=num_workers)
 
         logging.info("Building dictionary...")
         text_corpus.build_dictionary()
@@ -103,11 +103,11 @@ def main(directory: str, reference_file: str, num_topics: int = 5, passes: int =
     
     except Exception as e:
         logging.error(f"An error occurred: {e}")
-        return
+        raise Exception
 
     except KeyboardInterrupt:
         logging.error("\nKeyboard Interrupt. Exiting gracefully...")
-        return
+        raise KeyboardInterrupt
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Perform LDA-based topic modeling and calculate KL divergence for PDFs and text files in a directory.')
@@ -123,6 +123,7 @@ if __name__ == "__main__":
     parser.add_argument('--output_directory', type=str, default='outputs', help='Directory to save output CSV files. Default is "outputs".')
     parser.add_argument('--cache_file', type=str, default=None, help='Path to the cache file to save/load processed text data. Default is None.')
     parser.add_argument('--num_workers', type=int, default=4, help='Number of worker threads to use for both corpus creation and LDA training. Default is 4.')
+    parser.add_argument('--dict_size', type=int, default=10000, help='Maximum number of tokens to keep after filtering dictionary. Default is 10000.')
     
     args = parser.parse_args()
 
@@ -146,10 +147,8 @@ if __name__ == "__main__":
         handler.addFilter(gensim_progress_filter)
         gensim_logger.addHandler(handler)
 
-
-  
     logging.getLogger('lda_model').setLevel(logging.ERROR)
 
     logging.info(f'Processing {len([os.path.join(args.directory, filename) for filename in os.listdir(args.directory) if filename.endswith(('.pdf', '.txt'))])} files in directory: {args.directory}')
     
-    main(args.directory, args.reference_file, args.num_topics, args.passes, args.no_below, args.no_above, args.minimum_topic_probability, args.max_files, args.num_words, args.output_directory, args.cache_file, args.num_workers)
+    main(args.directory, args.reference_file, args.num_topics, args.passes, args.no_below, args.no_above, args.minimum_topic_probability, args.max_files, args.num_words, args.output_directory, args.cache_file, args.num_workers, args.dict_size)

@@ -51,19 +51,21 @@ def process_file(filepath: str, log_filename: str) -> Optional[Dict[str, List[st
     return None
 
 class TextCorpus:
-    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, cache_file: Optional[str] = None, log_filename: str = 'outputs/skipped_files.csv', num_workers: int = 7):
+    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, keep_n: Optional[int] = None, cache_file: Optional[str] = None, log_filename: str = 'outputs/skipped_files.csv', num_workers: int = 7):
         """
         Args:
             directory (str): The directory containing the text files.
             no_below (int): Minimum number of documents a token must appear in.
             no_above (float): Maximum proportion of documents a token can appear in.
             max_files (Optional[int]): Maximum number of files to process.
+            keep_n (Optional[int]): Maximum number of tokens to keep after filtering.
             cache_file (Optional[str]): Path to a file where the cache should be saved or loaded from.
             num_workers (int): Number of worker processes to use for parallel processing.
         """
         self.directory = directory
         self.no_below = no_below
         self.no_above = no_above
+        self.keep_n = keep_n
         self.filepaths = []
         self.skipped_filepaths = []
         self.preprocessed_texts: Dict[str, List[str]] = {}
@@ -129,8 +131,10 @@ class TextCorpus:
             if not tokens:
                 logging.warning(f"No tokens found for file: {filepath}")
             self.dictionary.add_documents([tokens])
+
         logging.info(f"Dictionary size before filtering: {len(self.dictionary)}")
-        self.dictionary.filter_extremes(no_below=self.no_below, no_above=self.no_above)  # Filter based on user input
+        # Adjust the limit of tokens to keep by setting keep_n to the specified value
+        self.dictionary.filter_extremes(no_below=self.no_below, no_above=self.no_above, keep_n=self.keep_n)
         logging.info(f"Dictionary size after filtering: {len(self.dictionary)}")
 
         # Save the cache to a file if a path is provided
@@ -144,7 +148,7 @@ class TextCorpus:
             logging.info(f"Saved cache to {self.cache_file}")
 
 class TextCorpusWithProgress(TextCorpus):
-    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, cache_file: Optional[str] = None, log_filename: str = 'outputs/skipped_files.csv', num_workers: int = 4):
+    def __init__(self, directory: str, no_below: int = 1, no_above: float = 0.9, max_files: Optional[int] = None, keep_n: Optional[int] = None, cache_file: Optional[str] = None, log_filename: str = 'outputs/skipped_files.csv', num_workers: int = 4):
         """
         Initializes the TextCorpusWithProgress with a directory and filtering parameters.
         
@@ -153,10 +157,11 @@ class TextCorpusWithProgress(TextCorpus):
             no_below (int): Minimum number of documents a token must appear in.
             no_above (float): Maximum proportion of documents a token can appear in.
             max_files (Optional[int]): Maximum number of files to process.
+            keep_n (Optional[int]): Maximum number of tokens to keep after filtering.
             cache_file (Optional[str]): Path to a file where the cache should be saved or loaded from.
             num_workers (int): Number of worker threads to use for parallel processing.
         """
-        super().__init__(directory, no_below, no_above, max_files, cache_file, log_filename, num_workers)
+        super().__init__(directory, no_below, no_above, max_files, keep_n, cache_file, log_filename, num_workers)
 
     def __iter__(self) -> Generator[List[tuple], None, None]:
         """
@@ -173,3 +178,9 @@ class TextCorpusWithProgress(TextCorpus):
         for filepath in self.filepaths:
             if filepath in self.preprocessed_texts:
                 yield self.dictionary.doc2bow(self.preprocessed_texts[filepath])
+
+# Usage example
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+    corpus = TextCorpusWithProgress(directory='path_to_your_data', keep_n=200000)  # Example with keep_n set to 200,000
+    corpus.build_dictionary()
